@@ -38,27 +38,41 @@ if (isset($_POST['submit'])) {
         $contact_no = trim($data[6]);
         $address = trim($data[7]);
 
-        // Insert data into the table using prepared statement
-        $sql = "INSERT INTO student (admission_no, names, class, date_of_birth, father_name, mother_name, contact_no, address) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        // Check if the admission_no already exists
+        $check_sql = "SELECT admission_no FROM student WHERE admission_no = ?";
+        $check_stmt = $conn->prepare($check_sql);
+        $check_stmt->bind_param("s", $admission_no);
+        $check_stmt->execute();
+        $check_stmt->store_result();
 
-        // Use prepared statement to avoid SQL injection
-        $stmt = $conn->prepare($sql);
-
-        // Check if the prepare was successful
-        if ($stmt) {
-            $stmt->bind_param("ssssssss", $admission_no, $names, $class, $date_of_birth, $father_name, $mother_name, $contact_no, $address);
-
-            if ($stmt->execute()) {
-                echo "Record inserted successfully!<br>";
-            } else {
-                echo "Error executing statement: " . $stmt->error;
-            }
-
-            $stmt->close();
+        // If admission_no already exists, skip the insertion
+        if ($check_stmt->num_rows > 0) {
+            echo "Duplicate entry for admission_no: $admission_no. Skipping insertion.<br>";
         } else {
-            echo "Error preparing statement: " . $conn->error;
+            // Insert data into the table using prepared statement
+            $insert_sql = "INSERT INTO student (admission_no, names, class, date_of_birth, father_name, mother_name, contact_no, address) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+            // Use prepared statement to avoid SQL injection
+            $insert_stmt = $conn->prepare($insert_sql);
+
+            // Check if the prepare was successful
+            if ($insert_stmt) {
+                $insert_stmt->bind_param("ssssssss", $admission_no, $names, $class, $date_of_birth, $father_name, $mother_name, $contact_no, $address);
+
+                if ($insert_stmt->execute()) {
+                    echo "Record inserted successfully!<br>";
+                } else {
+                    echo "Error executing statement: " . $insert_stmt->error;
+                }
+
+                $insert_stmt->close();
+            } else {
+                echo "Error preparing statement for insertion: " . $conn->error;
+            }
         }
+
+        $check_stmt->close();
     }
 
     fclose($handle);
