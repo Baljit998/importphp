@@ -39,8 +39,7 @@ if (isset($_POST['submit'])) {
         $mother_name = trim($data[5]);
         $contact_no = trim($data[6]);
         $address = trim($data[7]);
-        $photo_name = trim($data[8]);
-        $school_id = trim($data[9]);
+        $school_id = trim($data[8]);
 
         // Check if admission number and class are not empty
         if (!empty($admission_no) && !empty($class)) {
@@ -55,15 +54,15 @@ if (isset($_POST['submit'])) {
                 echo "Record with admission number $admission_no already exists. Skipping insertion.<br>";
             } else {
                 // Insert data into the table using prepared statement
-                $insert_sql = "INSERT INTO student_data (admission_no, names, class, date_of_birth, father_name, mother_name, contact_no, address, photo_name, school_id) 
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                $insert_sql = "INSERT INTO student_data (admission_no, names, class, date_of_birth, father_name, mother_name, contact_no, address, school_id) 
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
                 // Use prepared statement to avoid SQL injection
                 $insert_stmt = $conn->prepare($insert_sql);
 
                 // Check if the prepare was successful
                 if ($insert_stmt) {
-                    $insert_stmt->bind_param("ssssssssss", $admission_no, $names, $class, $date_of_birth, $father_name, $mother_name, $contact_no, $address, $photo_name, $school_id);
+                    $insert_stmt->bind_param("sssssssss", $admission_no, $names, $class, $date_of_birth, $father_name, $mother_name, $contact_no, $address, $school_id);
 
                     if ($insert_stmt->execute()) {
                         echo "Record inserted successfully!<br>";
